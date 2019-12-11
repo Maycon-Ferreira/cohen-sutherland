@@ -151,6 +151,11 @@ int main(int argc, char *argv[]) {
 
     FILE *file = fopen(argv[1], "r");
 
+    if (file == NULL) {
+        perror("Could not open file");
+        return 2;
+    }
+
     fscanf(file, "%lf\n"
                  "%lf\n"
                  "%lf\n"
@@ -162,8 +167,6 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < num_lines; ++i) {
         fscanf(file, "%lf %lf\n"
                      "%lf %lf\n", &lines[i].x1, &lines[i].y1, &lines[i].x2, &lines[i].y2);
-
-        printf("Line %d: x1: %lf, y1: %lf, x2: %lf y2: %lf\n", i, lines[i].x1, lines[i].y1, lines[i].x2, lines[i].y2);
     }
 
     fclose(file);
