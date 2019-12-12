@@ -22,10 +22,10 @@ typedef struct {
     double y_max;
 } screen_t;
 
-double x1 = 0;
-double y1 = 0;
-double x2 = 0;
-double y2 = 0;
+double x1_coord = 0;
+double y1_coord = 0;
+double x2_coord = 0;
+double y2_coord = 0;
 
 int num_lines = 0;
 line_t *lines = NULL;
@@ -51,46 +51,46 @@ int cohen_sutherland(line_t *line) {
         return -1;
     } else {
         if (area_p1 == INSIDE) {
-            x1 = line->x1;
-            y1 = line->y1;
+            x1_coord = line->x1;
+            y1_coord = line->y1;
         }
         if (area_p2 == INSIDE) {
-            x2 = line->x2;
-            y2 = line->y2;
+            x2_coord = line->x2;
+            y2_coord = line->y2;
         }
 
         if (area_p1 & LEFT) {
-            y1 = line->y1 + (line->y2 - line->y1) * (screen.x_min - line->x1) / (line->x2 - line->x1);
-            x1 = screen.x_min;
+            y1_coord = line->y1 + (line->y2 - line->y1) * (screen.x_min - line->x1) / (line->x2 - line->x1);
+            x1_coord = screen.x_min;
         }
         if (area_p1 & RIGHT) {
-            y1 = line->y1 + (line->y2 - line->y1) * (screen.x_max - line->x1) / (line->x2 - line->x1);
-            x1 = screen.x_max;
+            y1_coord = line->y1 + (line->y2 - line->y1) * (screen.x_max - line->x1) / (line->x2 - line->x1);
+            x1_coord = screen.x_max;
         }
         if (area_p1 & BOTTOM) {
-            x1 = line->x1 + (line->x2 - line->x1) * (screen.y_min - line->y1) / (line->y2 - line->y1);
-            y1 = screen.y_min;
+            x1_coord = line->x1 + (line->x2 - line->x1) * (screen.y_min - line->y1) / (line->y2 - line->y1);
+            y1_coord = screen.y_min;
         }
         if (area_p1 & TOP) {
-            x1 = line->x1 + (line->x2 - line->x1) * (screen.y_max - line->y1) / (line->y2 - line->y1);
-            y1 = screen.y_max;
+            x1_coord = line->x1 + (line->x2 - line->x1) * (screen.y_max - line->y1) / (line->y2 - line->y1);
+            y1_coord = screen.y_max;
         }
 
         if (area_p2 & LEFT) {
-            y2 = line->y1 + (line->y2 - line->y1) * (screen.x_min - line->x1) / (line->x2 - line->x1);
-            x2 = screen.x_min;
+            y2_coord = line->y1 + (line->y2 - line->y1) * (screen.x_min - line->x1) / (line->x2 - line->x1);
+            x2_coord = screen.x_min;
         }
         if (area_p2 & RIGHT) {
-            y2 = line->y1 + (line->y2 - line->y1) * (screen.x_max - line->x1) / (line->x2 - line->x1);
-            x2 = screen.x_max;
+            y2_coord = line->y1 + (line->y2 - line->y1) * (screen.x_max - line->x1) / (line->x2 - line->x1);
+            x2_coord = screen.x_max;
         }
         if (area_p2 & BOTTOM) {
-            x2 = line->x1 + (line->x2 - line->x1) * (screen.y_min - line->y1) / (line->y2 - line->y1);
-            y2 = screen.y_min;
+            x2_coord = line->x1 + (line->x2 - line->x1) * (screen.y_min - line->y1) / (line->y2 - line->y1);
+            y2_coord = screen.y_min;
         }
         if (area_p2 & TOP) {
-            x2 = line->x1 + (line->x2 - line->x1) * (screen.y_max - line->y1) / (line->y2 - line->y1);
-            y2 = screen.y_max;
+            x2_coord = line->x1 + (line->x2 - line->x1) * (screen.y_max - line->y1) / (line->y2 - line->y1);
+            y2_coord = screen.y_max;
         }
         return 0;
     }
@@ -128,8 +128,8 @@ void display() {
         if (cohen_sutherland(lines + i) == 0) {
             glBegin(GL_LINES);
             {
-                glVertex3d(x1, y1, 9.9);
-                glVertex3d(x2, y2, 9.9);
+                glVertex3d(x1_coord, y1_coord, 9.9);
+                glVertex3d(x2_coord, y2_coord, 9.9);
             }
             glEnd();
         }
@@ -184,5 +184,6 @@ int main(int argc, char *argv[]) {
     glutDisplayFunc(display);
     glFrontFace(GL_CCW);
     glutMainLoop();
+    free(lines);
     return 0;
 }
