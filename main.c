@@ -15,10 +15,12 @@ typedef struct {
     double y2;
 } line_t;
 
-double x_min = 0;
-double x_max = 0;
-double y_min = 0;
-double y_max = 0;
+typedef struct {
+    double x_min;
+    double x_max;
+    double y_min;
+    double y_max;
+} screen_t;
 
 double x1 = 0;
 double y1 = 0;
@@ -28,13 +30,15 @@ double y2 = 0;
 int num_lines = 0;
 line_t *lines = NULL;
 
+screen_t screen = {0};
+
 unsigned char area_code(double x, double y) {
     unsigned char code = INSIDE;
 
-    if (x < x_min) { code |= LEFT; }
-    if (x > x_max) { code |= RIGHT; }
-    if (y < y_min) { code |= BOTTOM; }
-    if (y > y_max) { code |= TOP; }
+    if (x < screen.x_min) { code |= LEFT; }
+    if (x > screen.x_max) { code |= RIGHT; }
+    if (y < screen.y_min) { code |= BOTTOM; }
+    if (y > screen.y_max) { code |= TOP; }
 
     return code;
 }
@@ -54,37 +58,39 @@ int cohen_sutherland(line_t *line) {
             x2 = line->x2;
             y2 = line->y2;
         }
+
         if (area_p1 & LEFT) {
-            y1 = line->y1 + (line->y2 - line->y1) * (x_min - line->x1) / (line->x2 - line->x1);
-            x1 = x_min;
+            y1 = line->y1 + (line->y2 - line->y1) * (screen.x_min - line->x1) / (line->x2 - line->x1);
+            x1 = screen.x_min;
         }
         if (area_p1 & RIGHT) {
-            y1 = line->y1 + (line->y2 - line->y1) * (x_max - line->x1) / (line->x2 - line->x1);
-            x1 = x_max;
+            y1 = line->y1 + (line->y2 - line->y1) * (screen.x_max - line->x1) / (line->x2 - line->x1);
+            x1 = screen.x_max;
         }
         if (area_p1 & BOTTOM) {
-            x1 = line->x1 + (line->x2 - line->x1) * (y_min - line->y1) / (line->y2 - line->y1);
-            y1 = y_min;
+            x1 = line->x1 + (line->x2 - line->x1) * (screen.y_min - line->y1) / (line->y2 - line->y1);
+            y1 = screen.y_min;
         }
         if (area_p1 & TOP) {
-            x1 = line->x1 + (line->x2 - line->x1) * (y_max - line->y1) / (line->y2 - line->y1);
-            y1 = y_max;
+            x1 = line->x1 + (line->x2 - line->x1) * (screen.y_max - line->y1) / (line->y2 - line->y1);
+            y1 = screen.y_max;
         }
+
         if (area_p2 & LEFT) {
-            y2 = line->y1 + (line->y2 - line->y1) * (x_min - line->x1) / (line->x2 - line->x1);
-            x2 = x_min;
+            y2 = line->y1 + (line->y2 - line->y1) * (screen.x_min - line->x1) / (line->x2 - line->x1);
+            x2 = screen.x_min;
         }
         if (area_p2 & RIGHT) {
-            y2 = line->y1 + (line->y2 - line->y1) * (x_max - line->x1) / (line->x2 - line->x1);
-            x2 = x_max;
+            y2 = line->y1 + (line->y2 - line->y1) * (screen.x_max - line->x1) / (line->x2 - line->x1);
+            x2 = screen.x_max;
         }
         if (area_p2 & BOTTOM) {
-            x2 = line->x1 + (line->x2 - line->x1) * (y_min - line->y1) / (line->y2 - line->y1);
-            y2 = y_min;
+            x2 = line->x1 + (line->x2 - line->x1) * (screen.y_min - line->y1) / (line->y2 - line->y1);
+            y2 = screen.y_min;
         }
         if (area_p2 & TOP) {
-            x2 = line->x1 + (line->x2 - line->x1) * (y_max - line->y1) / (line->y2 - line->y1);
-            y2 = y_max;
+            x2 = line->x1 + (line->x2 - line->x1) * (screen.y_max - line->y1) / (line->y2 - line->y1);
+            y2 = screen.y_max;
         }
         return 0;
     }
@@ -97,11 +103,11 @@ void display() {
 
     glBegin(GL_LINE_STRIP);
     {
-        glVertex3d(x_min, y_min, 10.0);
-        glVertex3d(x_min, y_max, 10.0);
-        glVertex3d(x_max, y_max, 10.0);
-        glVertex3d(x_max, y_min, 10.0);
-        glVertex3d(x_min, y_min, 10.0);
+        glVertex3d(screen.x_min, screen.y_min, 10.0);
+        glVertex3d(screen.x_min, screen.y_max, 10.0);
+        glVertex3d(screen.x_max, screen.y_max, 10.0);
+        glVertex3d(screen.x_max, screen.y_min, 10.0);
+        glVertex3d(screen.x_min, screen.y_min, 10.0);
     }
     glEnd();
 
@@ -140,9 +146,7 @@ void init() {
     glOrtho(-10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "cert-err34-c"
-
+// TODO safe input read
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         puts("Usage: ./cohen-sutherland FILE");
@@ -160,7 +164,7 @@ int main(int argc, char *argv[]) {
                  "%lf\n"
                  "%lf\n"
                  "%lf\n"
-                 "%d\n", &x_min, &x_max, &y_min, &y_max, &num_lines);
+                 "%d\n", &screen.x_min, &screen.x_max, &screen.y_min, &screen.y_max, &num_lines);
 
     lines = calloc(num_lines, sizeof(line_t));
 
@@ -172,7 +176,7 @@ int main(int argc, char *argv[]) {
     fclose(file);
 
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitDisplayMode(0);
     glutInitWindowSize(600, 600);
     glutInitWindowPosition(100, 100);
     glutCreateWindow("Cohen-Sutherland");
@@ -182,5 +186,3 @@ int main(int argc, char *argv[]) {
     glutMainLoop();
     return 0;
 }
-
-#pragma clang diagnostic pop
